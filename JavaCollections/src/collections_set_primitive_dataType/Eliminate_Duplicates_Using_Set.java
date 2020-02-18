@@ -4,6 +4,7 @@
  * Hashset will internally implements hashMap to store and retrieve value.
  * Insertion order is not maintained in Hashset.
  * hashset elements cannot be sorted.
+ * HashSet is not index based data Structure.
 */
 package collections_set_primitive_dataType;
 
@@ -16,7 +17,7 @@ public class Eliminate_Duplicates_Using_Set
 {
 	public static void main(String[] args) 
 	{
-		Set<String> set = new HashSet<String>();
+		HashSet<String> set = new HashSet<String>();
 		set.add("Apple");
 		set.add("Cat");
 		set.add("Zebra");
@@ -28,6 +29,9 @@ public class Eliminate_Duplicates_Using_Set
 		set.add("Gun");
 		set.add("null");
 		set.add("null");
+		
+		Set<String> set2 = new HashSet<String>(10, 0.75f);
+		
 		
 //		System.out.println(set.contains("Gun"));
 //		System.out.println(set.equals(new HashSet<String>().add("Roja")));//returns true if 2 sets are equal else returns false.

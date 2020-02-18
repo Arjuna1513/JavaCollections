@@ -28,6 +28,8 @@ public class ArrayListEx1
 		list.add("C");
 		list.add(1, "Index Based Insertion list1");
 		list.remove(2);
+		System.out.println(list.size());
+//		System.out.println();
 		
 		ArrayList<String> list1 = new ArrayList<String>(3);
 		list1.add("X");
@@ -89,6 +91,15 @@ public class ArrayListEx1
 	}
 }
 /*
+ ArrayList is index based i.e. elements can be added or deleted based on index value.
+ ArrayList does not maintain the insertion order.
+ ArrayList accepts the duplicates.
+ ArrayList values can be sorted.
+ ArrayList is used when the frequent operations are storing and accessing.
+ ArrayList not good for manupulating because when element is deleted all elements should be shifted
+ towards left.
+ * 
+ * 
  ArrayList internally is implemented as array which grows dynamically.
  When we create ArrayList(5), then the paramterised constructor gets called as shown below:
  
@@ -111,7 +122,11 @@ public class ArrayListEx1
         this.elementData = DEFAULTCAPACITY_EMPTY_ELEMENTDATA;
     }
     
-    here the size of the array would be 10.
+    DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {}
+    The DEFAULTCAPACITY_EMPTY_ELEMENTDATA is pointing to empty list.
+    
+   In the above case where ArrayList is either given 0 or empty, when the first element is added 
+   to the ArrayList then the size of the array would be changed to 10.
     
     Adding element to an arrayLIst:
     ===============================
@@ -140,11 +155,15 @@ public class ArrayListEx1
         return minCapacity;
     }
     
-    when the above method is called it checks the max values among DEfaultCapacity(i.e. 10) and the new
-    size of the array i.e. size+1(minCapacity) and returns the same, using the returned value 
-    ensureExplicitCapacity method is called as shown below:
+    Assume we have created an ArrayList() without size and we try to add the first element.
+    =======================================================================================
+    So Since this is the first element elementData will be pointing to DEFAULTCAPACITY_EMPTY_ELEMENTDATA,
+    which means return Math.max(DEFAULT_CAPACITY, minCapacity); will get executed and value 10
+    will be returned.
     
-    private void ensureExplicitCapacity(int minCapacity) {
+    Now ensureExplicitCapacity(calculateCapacity(elementData, minCapacity)); with value 10 will be called
+      
+      private void ensureExplicitCapacity(int minCapacity) {
         modCount++;
 
         // overflow-conscious code
@@ -152,16 +171,14 @@ public class ArrayListEx1
             grow(minCapacity);
     }
     
-    Say suppose minCapacity is 6 and the array was created with default size i.e.
-    elementData == DEFAULTCAPACITY_EMPTY_ELEMENTDATA now minCapacity = 6 and elementData.length = 10.
-    then calculateCapacity will return the max value among 6, 10, since 10 is greater, the same is returned
-    and the same is passed to ensureExplicitCapacity method where in it checks 
-    if (minCapacity - elementData.length > 0)
+    In which it will check if 
+    (minCapacity - elementData.length > 0)
             grow(minCapacity);
             
-    i.e. if minCapacity is greater than the size of the array it will call grow method as shown below:
+    Since 10 - 0 > 0
+    grow(minCapacity); will be called.
     
-    private void grow(int minCapacity) {
+     private void grow(int minCapacity) {
         // overflow-conscious code
         int oldCapacity = elementData.length;
         int newCapacity = oldCapacity + (oldCapacity >> 1);
@@ -173,6 +190,97 @@ public class ArrayListEx1
         elementData = Arrays.copyOf(elementData, newCapacity);
     }
     
+    Since oldCapacity is 0
+    newCapacity = oldCapacity + (oldCapacity >> 1); will result in zero so,
+    newCapacity - minCapacity i.e. 0 - 1 will be < 0
+    so newCapacity = minCapacity;
+    which means 
+    newCapacity = 10
+    
+    then elementData = Arrays.copyOf(elementData, newCapacity); will get called which 
+    created new Array with size 10 and copy the old elements.
+    
+    
+    2.
+     Assume we have created an ArrayList(5) and when we try to add the element
+    =======================================================================================
+    ArrayList internally is implemented as array which grows dynamically.
+ When we create ArrayList(5), then the paramterised constructor gets called as shown below:
+ 
+ public ArrayList(int initialCapacity) {
+        if (initialCapacity > 0) {
+            this.elementData = new Object[initialCapacity];
+        } else if (initialCapacity == 0) {
+            this.elementData = EMPTY_ELEMENTDATA;
+        } else {
+            throw new IllegalArgumentException("Illegal Capacity: "+
+                                               initialCapacity);
+        }
+    }
+    
+    now the Array of size 5 got created.
+    
+    
+    Adding element to an arrayLIst:
+    ===============================
+    When an element is added to ArrayList below things takes place:
+    
+    public boolean add(E e) {
+        ensureCapacityInternal(size + 1);  // Increments modCount!!
+        elementData[size++] = e;
+        return true;
+    }
+    
+    When add(somevalue) is called, since 1 extra element is being added and the arrays are not
+    dynamically growing(i.e. size cannot be changed in runtime) size should be incremented by 1
+    size++,
+    
+    then ensureCapacityInternal is being called as shown below:
+    private void ensureCapacityInternal(int minCapacity) {
+        ensureExplicitCapacity(calculateCapacity(elementData, minCapacity));
+        
+    Here, inside ensureCapacityInternal method, calculateCapacity method is called:
+    
+     private static int calculateCapacity(Object[] elementData, int minCapacity) {
+        if (elementData == DEFAULTCAPACITY_EMPTY_ELEMENTDATA) {
+            return Math.max(DEFAULT_CAPACITY, minCapacity);
+        }
+        return minCapacity;
+    }
+    
+    it will return minCapacity i.e. 5+1=6 because elementData != DEFAULTCAPACITY_EMPTY_ELEMENTDATA
+    
+    Now ensureExplicitCapacity with value 6 is called.
+    
+     private void ensureExplicitCapacity(int minCapacity) {
+        modCount++;
+
+        // overflow-conscious code
+        if (minCapacity - elementData.length > 0)
+            grow(minCapacity);
+    }
+    
+    Since 6 - 5 > 0 grow(6) will get called
+        
+     private void grow(int minCapacity) {
+        // overflow-conscious code
+        int oldCapacity = elementData.length;
+        int newCapacity = oldCapacity + (oldCapacity >> 1);
+        if (newCapacity - minCapacity < 0)
+            newCapacity = minCapacity;
+        if (newCapacity - MAX_ARRAY_SIZE > 0)
+            newCapacity = hugeCapacity(minCapacity);
+        // minCapacity is usually close to size, so this is a win:
+        elementData = Arrays.copyOf(elementData, newCapacity);
+    }
+    
+    Since oldCapacity is 5
+    newCapacity = oldCapacity + (oldCapacity >> 1); will result in zero so,
+    newCapacity - minCapacity 7 - 5 is not < 0
+    so newCapacity = 7
+    
+  
+    
     here newCapacity is calculated as shown below:
     int newCapacity = oldCapacity + (oldCapacity >> 1);
     
@@ -181,12 +289,7 @@ public class ArrayListEx1
     x = 8; //00000100
     x >> 1 //00000010 
     now x becomes 4 after right shifting by 1.
-    
-    if (newCapacity - minCapacity < 0)
-            newCapacity = minCapacity;
-    Checks if still newCapacity < minCapacity, if yes
-    then   newCapacity = minCapacity;
-    
+
     if (newCapacity - MAX_ARRAY_SIZE > 0)
             newCapacity = hugeCapacity(minCapacity);
     if newCapacity >  MAX_ARRAY_SIZE(Integer.MAX_VALUE - 8) then 
